@@ -1,0 +1,53 @@
+### Test: Search for Books by Topic
+GET http://localhost:5000/search/distributed%20systems
+Accept: application/json
+
+###
+
+### Test: Get Book Info by Item Number
+GET http://localhost:5000/info/1
+Accept: application/json
+
+###
+
+### Test: Purchase a Book with Quantity Specified
+POST http://localhost:5000/purchase/1
+Content-Type: application/json
+
+{
+  "qty": 2
+}
+
+###
+
+### Test: Purchase a Book with Default Quantity (1)
+POST http://localhost:5000/purchase/2
+Content-Type: application/json
+
+{}
+
+###
+
+### Test: Attempt to Purchase a Book with Insufficient Stock
+POST http://localhost:5000/purchase/3
+Content-Type: application/json
+
+{
+  "qty": 100
+}
+
+###
+
+### Test: Attempt to Fetch Info for a Non-Existent Book
+GET http://localhost:5000/info/999
+Accept: application/json
+
+###
+
+### Test: Attempt to Purchase a Non-Existent Book
+POST http://localhost:5000/purchase/999
+Content-Type: application/json
+
+{
+  "qty": 1
+}
