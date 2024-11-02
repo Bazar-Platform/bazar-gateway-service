@@ -1,0 +1,34 @@
+services:
+  catalog-service:
+    build:
+      context: https://github.com/Bazar-Platform/bazar-catalog-service.git
+    image: bazar-catalog-service:latest
+    container_name: bazar-catalog-service
+    ports:
+      - "5001:5001"
+
+  order-service:
+    build:
+      context: https://github.com/Bazar-Platform/bazar-order-service.git
+    image: bazar-order-service:latest
+    container_name: bazar-order-service
+    ports:
+      - "5002:5002"
+    environment:
+      - CATALOG_URL=http://bazar-catalog-service:5001
+    depends_on:
+      - catalog-service
+
+  gateway-service:
+    build:
+      context: .
+    image: bazar-platform/gateway-service:latest
+    container_name: bazar-gateway-service
+    ports:
+      - "5000:5000"
+    environment:
+      - CATALOG_URL=http://bazar-catalog-service:5001
+      - ORDER_URL=http://bazar-order-service:5002
+    depends_on:
+      - catalog-service
+      - order-service
