@@ -64,7 +64,7 @@ The gateway service is part of a multi-service Docker Compose setup that include
 To build and run the gateway, catalog, and order services together, navigate to the project directory containing the
 `docker-compose.yml` file and run:
 
-```
+```bash
 docker-compose up --build
 ```
 
