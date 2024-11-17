@@ -1,23 +1,49 @@
 services:
-  catalog-service:
+  catalog-primary:
     build:
       context: https://github.com/Bazar-Platform/bazar-catalog-service.git
     image: bazar-catalog-service:latest
-    container_name: bazar-catalog-service
+    container_name: bazar-catalog-primary
     ports:
       - "5001:5001"
+    environment:
+      - ROLE=primary
+      - PEER_URL=http://bazar-catalog-backup:5001
 
-  order-service:
+  catalog-backup:
+    build:
+      context: https://github.com/Bazar-Platform/bazar-catalog-service.git
+    image: bazar-catalog-service:latest
+    container_name: bazar-catalog-backup
+    ports:
+      - "5010:5001"
+    environment:
+      - ROLE=backup
+      - PEER_URL=http://bazar-catalog-primary:5001
+
+  order-service-1:
     build:
       context: https://github.com/Bazar-Platform/bazar-order-service.git
     image: bazar-order-service:latest
-    container_name: bazar-order-service
+    container_name: bazar-order-service-1
     ports:
       - "5002:5002"
     environment:
-      - CATALOG_URL=http://bazar-catalog-service:5001
+      - CATALOG_URL=http://bazar-catalog-primary:5001
     depends_on:
-      - catalog-service
+      - catalog-primary
+
+  order-service-2:
+    build:
+      context: https://github.com/Bazar-Platform/bazar-order-service.git
+    image: bazar-order-service:latest
+    container_name: bazar-order-service-2
+    ports:
+      - "5020:5002"
+    environment:
+      - CATALOG_URL=http://bazar-catalog-primary:5001
+    depends_on:
+      - catalog-primary
 
   gateway-service:
     build:
@@ -27,8 +53,10 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - CATALOG_URL=http://bazar-catalog-service:5001
-      - ORDER_URL=http://bazar-order-service:5002
+      - CATALOG_SERVICES=http://bazar-catalog-primary:5001,http://bazar-catalog-backup:5001
+      - ORDER_SERVICES=http://bazar-order-service-1:5002,http://bazar-order-service-2:5002
     depends_on:
-      - catalog-service
-      - order-service
+      - catalog-primary
+      - catalog-backup
+      - order-service-1
+      - order-service-2
