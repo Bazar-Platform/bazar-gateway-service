@@ -4,21 +4,49 @@ The Bazar Gateway Service is a Node.js microservice that acts as the entry point
 online bookstore. It connects with the `bazar-catalog-service` to retrieve book details and with the
 `bazar-order-service` to process book purchases.
 
-## Project Structure
+## Features
 
-```
-bazar-gateway-service/
-├── src/
-│ ├── app.js # The main Node.js application
-│ └── package.json # List of dependencies
-└── Dockerfile # Dockerfile for the gateway service
-```
+- **Book Search**: Allows clients to search books by topic via the Catalog Service.
+- **Book Details**: Provides detailed information about specific books.
+- **Purchase Processing**: Facilitates purchase requests via the Order Service.
+- **Load Balancing**: Distributes requests across multiple Order & Catalog Service instances.
+- **Cache Optimization**: Implements a small in-memory cache for frequently accessed data to reduce response times.
+
+## Architecture
+
+The Gateway Service is designed to interact with a distributed system comprising multiple services. The key components
+and their roles in the architecture are:
+
+1. **Gateway Service**:
+    - Acts as the central access point for all client requests.
+    - Balances the load between multiple Service instances.
+    - Maintains a small in-memory cache to reduce redundant requests to downstream services.
+
+2. **Catalog Service**:
+    - Exposes two instances:
+        - **Primary Instance**: Handles queries and all of updates.
+        - **Backup Instance**: Synchronizes with the primary and serves as a query replica.
+    - Updates triggered by the Gateway Service ensure cache invalidation via the `CACHE_INVALIDATE_URL`.
+
+3. **Order Service**:
+    - Processes purchase requests.
+    - Multiple instances allow for load balancing and fault tolerance.
 
 ## Environment Variables
 
-- **PORT**: The port on which the gateway service will run (default: 5000).
-- **CATALOG_URL**: URL for the catalog service to fetch book details.
-- **ORDER_URL**: URL for the order service to process book purchases.
+The following environment variables configure the Gateway Service:
+
+- **General Settings**:
+    - `PORT` (default: `5000`): The port on which the gateway service runs.
+
+- **Catalog Service Configuration**:
+    - `CATALOG_SERVICES`: A comma-separated list of URLs for catalog services (e.g.,
+      `http://bazar-catalog-primary:5001,http://bazar-catalog-backup:5001`).
+    - `CACHE_SIZE` (default: `3`): The maximum number of items to store in the in-memory cache for catalog data.
+
+- **Order Service Configuration**:
+    - `ORDER_SERVICES`: A comma-separated list of URLs for order services (e.g.,
+      `http://bazar-order-service-1:5002,http://bazar-order-service-2:5002`).
 
 ## Endpoints
 
